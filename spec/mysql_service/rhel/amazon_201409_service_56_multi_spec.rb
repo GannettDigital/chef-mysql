@@ -6,7 +6,7 @@ describe 'mysql_service_test::single on amazon-2014.09' do
       platform: 'amazon',
       version: '2014.09',
       step_into: 'mysql_service'
-      ) do |node|
+    ) do |node|
       node.set['mysql']['version'] = '5.6'
       node.set['mysql']['port'] = '3308'
       node.set['mysql']['data_dir'] = '/data/instance-2'
@@ -17,10 +17,8 @@ describe 'mysql_service_test::single on amazon-2014.09' do
   end
 
   before do
+    allow(Chef::Platform::ServiceHelpers).to receive(:service_resource_providers).and_return([:redhat])
     stub_command('/usr/bin/test -f /data/instance-1/mysql/user.frm').and_return(true)
-  end
-
-  before do
     stub_command('/usr/bin/test -f /data/instance-2/mysql/user.frm').and_return(true)
   end
 
@@ -116,80 +114,80 @@ describe 'mysql_service_test::single on amazon-2014.09' do
     it 'creates link[instance-1 :create /usr/share/my-default.cnf]' do
       expect(amazon_201409_service_56_multi).to create_link('instance-1 :create /usr/share/my-default.cnf')
         .with(
-        target_file: '/usr/share/my-default.cnf',
-        to: '/etc/mysql-instance-1/my.cnf'
+          target_file: '/usr/share/my-default.cnf',
+          to: '/etc/mysql-instance-1/my.cnf'
         )
     end
 
     it 'creates directory[instance-1 :create /etc/mysql-instance-1]' do
       expect(amazon_201409_service_56_multi).to create_directory('instance-1 :create /etc/mysql-instance-1')
         .with(
-        path: '/etc/mysql-instance-1',
-        owner: 'alice',
-        group: 'alice',
-        mode: '0750',
-        recursive: true
+          path: '/etc/mysql-instance-1',
+          owner: 'alice',
+          group: 'alice',
+          mode: '0750',
+          recursive: true
         )
     end
 
     it 'creates directory[instance-1 :create /etc/mysql-instance-1/conf.d]' do
       expect(amazon_201409_service_56_multi).to create_directory('instance-1 :create /etc/mysql-instance-1/conf.d')
         .with(
-        path: '/etc/mysql-instance-1/conf.d',
-        owner: 'alice',
-        group: 'alice',
-        mode: '0750',
-        recursive: true
+          path: '/etc/mysql-instance-1/conf.d',
+          owner: 'alice',
+          group: 'alice',
+          mode: '0750',
+          recursive: true
         )
     end
 
     it 'creates directory[instance-1 :create /var/run/mysql-instance-1]' do
       expect(amazon_201409_service_56_multi).to create_directory('instance-1 :create /var/run/mysql-instance-1')
         .with(
-        path: '/var/run/mysql-instance-1',
-        owner: 'alice',
-        group: 'alice',
-        mode: '0755',
-        recursive: true
+          path: '/var/run/mysql-instance-1',
+          owner: 'alice',
+          group: 'alice',
+          mode: '0755',
+          recursive: true
         )
     end
 
     it 'creates directory[instance-1 :create /var/log/mysql-instance-1]' do
       expect(amazon_201409_service_56_multi).to create_directory('instance-1 :create /var/log/mysql-instance-1')
         .with(
-        path: '/var/log/mysql-instance-1',
-        owner: 'alice',
-        group: 'alice',
-        mode: '0750',
-        recursive: true
+          path: '/var/log/mysql-instance-1',
+          owner: 'alice',
+          group: 'alice',
+          mode: '0750',
+          recursive: true
         )
     end
 
     it 'creates directory[instance-1 :create /data/instance-1]' do
       expect(amazon_201409_service_56_multi).to create_directory('instance-1 :create /data/instance-1')
         .with(
-        path: '/data/instance-1',
-        owner: 'alice',
-        group: 'alice',
-        mode: '0750',
-        recursive: true
+          path: '/data/instance-1',
+          owner: 'alice',
+          group: 'alice',
+          mode: '0750',
+          recursive: true
         )
     end
 
     it 'creates template[instance-1 :create /etc/mysql-instance-1/my.cnf]' do
       expect(amazon_201409_service_56_multi).to create_template('instance-1 :create /etc/mysql-instance-1/my.cnf')
         .with(
-        path: '/etc/mysql-instance-1/my.cnf',
-        owner: 'alice',
-        group: 'alice',
-        mode: '0600'
+          path: '/etc/mysql-instance-1/my.cnf',
+          owner: 'alice',
+          group: 'alice',
+          mode: '0600'
         )
     end
 
     it 'runs bash[instance-1 :create initialize mysql database]' do
       expect(amazon_201409_service_56_multi).to_not run_bash('instance-1 :create initialize mysql database')
         .with(
-        cwd: '/data/instance-1'
+          cwd: '/data/instance-1'
         )
     end
 
@@ -200,19 +198,19 @@ describe 'mysql_service_test::single on amazon-2014.09' do
     it 'create template[instance-1 :start /etc/init.d/mysql-instance-1]' do
       expect(amazon_201409_service_56_multi).to create_template('instance-1 :start /etc/init.d/mysql-instance-1')
         .with(
-        path: '/etc/init.d/mysql-instance-1',
-        source: 'sysvinit/mysqld.erb',
-        owner: 'root',
-        group: 'root',
-        mode: '0755',
-        cookbook: 'mysql'
+          path: '/etc/init.d/mysql-instance-1',
+          source: 'sysvinit/mysqld.erb',
+          owner: 'root',
+          group: 'root',
+          mode: '0755',
+          cookbook: 'mysql'
         )
     end
 
     it 'starts service[instance-1 :start mysql-instance-1]' do
       expect(amazon_201409_service_56_multi).to start_service('instance-1 :start mysql-instance-1')
         .with(
-        service_name: 'mysql-instance-1'
+          service_name: 'mysql-instance-1'
         )
     end
   end
@@ -252,80 +250,80 @@ describe 'mysql_service_test::single on amazon-2014.09' do
     it 'creates link[instance-2 :create /usr/share/my-default.cnf]' do
       expect(amazon_201409_service_56_multi).to create_link('instance-2 :create /usr/share/my-default.cnf')
         .with(
-        target_file: '/usr/share/my-default.cnf',
-        to: '/etc/mysql-instance-2/my.cnf'
+          target_file: '/usr/share/my-default.cnf',
+          to: '/etc/mysql-instance-2/my.cnf'
         )
     end
 
     it 'creates directory[instance-2 :create /etc/mysql-instance-2]' do
       expect(amazon_201409_service_56_multi).to create_directory('instance-2 :create /etc/mysql-instance-2')
         .with(
-        path: '/etc/mysql-instance-2',
-        owner: 'bob',
-        group: 'bob',
-        mode: '0750',
-        recursive: true
+          path: '/etc/mysql-instance-2',
+          owner: 'bob',
+          group: 'bob',
+          mode: '0750',
+          recursive: true
         )
     end
 
     it 'creates directory[instance-2 :create /etc/mysql-instance-2/conf.d]' do
       expect(amazon_201409_service_56_multi).to create_directory('instance-2 :create /etc/mysql-instance-2/conf.d')
         .with(
-        path: '/etc/mysql-instance-2/conf.d',
-        owner: 'bob',
-        group: 'bob',
-        mode: '0750',
-        recursive: true
+          path: '/etc/mysql-instance-2/conf.d',
+          owner: 'bob',
+          group: 'bob',
+          mode: '0750',
+          recursive: true
         )
     end
 
     it 'creates directory[instance-2 :create /var/run/mysql-instance-2]' do
       expect(amazon_201409_service_56_multi).to create_directory('instance-2 :create /var/run/mysql-instance-2')
         .with(
-        path: '/var/run/mysql-instance-2',
-        owner: 'bob',
-        group: 'bob',
-        mode: '0755',
-        recursive: true
+          path: '/var/run/mysql-instance-2',
+          owner: 'bob',
+          group: 'bob',
+          mode: '0755',
+          recursive: true
         )
     end
 
     it 'creates directory[instance-2 :create /var/log/mysql-instance-2]' do
       expect(amazon_201409_service_56_multi).to create_directory('instance-2 :create /var/log/mysql-instance-2')
         .with(
-        path: '/var/log/mysql-instance-2',
-        owner: 'bob',
-        group: 'bob',
-        mode: '0750',
-        recursive: true
+          path: '/var/log/mysql-instance-2',
+          owner: 'bob',
+          group: 'bob',
+          mode: '0750',
+          recursive: true
         )
     end
 
     it 'creates directory[instance-2 :create /data/instance-2]' do
       expect(amazon_201409_service_56_multi).to create_directory('instance-2 :create /data/instance-2')
         .with(
-        path: '/data/instance-2',
-        owner: 'bob',
-        group: 'bob',
-        mode: '0750',
-        recursive: true
+          path: '/data/instance-2',
+          owner: 'bob',
+          group: 'bob',
+          mode: '0750',
+          recursive: true
         )
     end
 
     it 'creates template[instance-2 :create /etc/mysql-instance-2/my.cnf]' do
       expect(amazon_201409_service_56_multi).to create_template('instance-2 :create /etc/mysql-instance-2/my.cnf')
         .with(
-        path: '/etc/mysql-instance-2/my.cnf',
-        owner: 'bob',
-        group: 'bob',
-        mode: '0600'
+          path: '/etc/mysql-instance-2/my.cnf',
+          owner: 'bob',
+          group: 'bob',
+          mode: '0600'
         )
     end
 
     it 'runs bash[instance-2 :create initialize mysql database]' do
       expect(amazon_201409_service_56_multi).to_not run_bash('instance-2 :create initialize mysql database')
         .with(
-        cwd: '/data/instance-2'
+          cwd: '/data/instance-2'
         )
     end
 
@@ -336,19 +334,19 @@ describe 'mysql_service_test::single on amazon-2014.09' do
     it 'create template[instance-2 :start /etc/init.d/mysql-instance-2]' do
       expect(amazon_201409_service_56_multi).to create_template('instance-2 :start /etc/init.d/mysql-instance-2')
         .with(
-        path: '/etc/init.d/mysql-instance-2',
-        source: 'sysvinit/mysqld.erb',
-        owner: 'root',
-        group: 'root',
-        mode: '0755',
-        cookbook: 'mysql'
+          path: '/etc/init.d/mysql-instance-2',
+          source: 'sysvinit/mysqld.erb',
+          owner: 'root',
+          group: 'root',
+          mode: '0755',
+          cookbook: 'mysql'
         )
     end
 
     it 'starts service[instance-2 :start mysql-instance-2]' do
       expect(amazon_201409_service_56_multi).to start_service('instance-2 :start mysql-instance-2')
         .with(
-        service_name: 'mysql-instance-2'
+          service_name: 'mysql-instance-2'
         )
     end
   end

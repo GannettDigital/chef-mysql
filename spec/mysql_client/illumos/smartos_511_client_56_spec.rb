@@ -6,9 +6,9 @@ describe 'mysql_client_test::default on smartos-511' do
       platform: 'smartos',
       version: '5.11',
       step_into: 'mysql_client'
-      ) do |node|
-        node.set['mysql']['version'] = '5.6'
-      end.converge('mysql_client_test::default')
+    ) do |node|
+      node.set['mysql']['version'] = '5.6'
+    end.converge('mysql_client_test::default')
   end
 
   # Resource in mysql_client_test::default
@@ -23,8 +23,8 @@ describe 'mysql_client_test::default on smartos-511' do
     it 'installs package[default :create mysql-client]' do
       expect(smartos_511_client_56).to install_package('default :create mysql-client')
         .with(
-        package_name: 'mysql-client',
-        version: '5.6'
+          package_name: 'mysql-client',
+          version: '5.6'
         )
     end
   end

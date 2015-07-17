@@ -1,14 +1,42 @@
 require 'spec_helper'
 
-describe 'mysql_service_test::single on ubuntu-10.04' do
-  cached(:ubuntu_1004_service_51_single) do
+describe 'mysql_service_test::property_test on ubuntu-14.04' do
+  cached(:property_test) do
     ChefSpec::SoloRunner.new(
       platform: 'ubuntu',
-      version: '10.04',
+      version: '14.04',
       step_into: 'mysql_service'
     ) do |node|
-      node.set['mysql']['version'] = '5.1'
-    end.converge('mysql_service_test::single')
+      node.set['mysql']['version'] = '5.5'
+      node.set['mysql']['socket'] = '/var/run/mysqld/mysqld.sock'
+    end.converge('mysql_service_test::property_test')
+  end
+
+  let(:my_cnf_content) do
+    <<-EOF
+# Chef generated my.cnf for instance mysql-default
+
+[client]
+default-character-set          = utf8
+port                           = 3306
+socket                         = /var/run/mysqld/mysqld.sock
+
+[mysql]
+default-character-set          = utf8
+
+[mysqld]
+user                           = mysql
+pid-file                       = /run/mysql-default/mysqld.pid
+socket                         = /var/run/mysqld/mysqld.sock
+port                           = 3306
+datadir                        = /var/lib/mysql-default
+tmpdir                         = /tmp
+log-error                      = /var/log/mysql-default/error.log
+!includedir /etc/mysql-default/conf.d
+
+[mysqld_safe]
+socket                         = /var/run/mysqld/mysqld.sock
+EOF
   end
 
   before do
@@ -18,29 +46,29 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
   # Resource in mysql_service_test::single
   context 'compiling the test recipe' do
     it 'creates mysql_service[default]' do
-      expect(ubuntu_1004_service_51_single).to create_mysql_service('default')
+      expect(property_test).to create_mysql_service('default')
     end
   end
 
   # mysql_service resource internal implementation
   context 'stepping into mysql_service[default] resource' do
-    it 'installs package[default :create mysql-server-5.1]' do
-      expect(ubuntu_1004_service_51_single).to install_package('default :create mysql-server-5.1')
-        .with(package_name: 'mysql-server-5.1', version: nil)
+    it 'installs package[default :create mysql-server-5.5]' do
+      expect(property_test).to install_package('default :create mysql-server-5.5')
+        .with(package_name: 'mysql-server-5.5', version: nil)
     end
 
     it 'stops service[default :create mysql]' do
-      expect(ubuntu_1004_service_51_single).to disable_service('default :create mysql')
-      expect(ubuntu_1004_service_51_single).to stop_service('default :create mysql')
+      expect(property_test).to disable_service('default :create mysql')
+      expect(property_test).to stop_service('default :create mysql')
     end
 
     it 'installs package[default :create apparmor]' do
-      expect(ubuntu_1004_service_51_single).to install_package('default :create apparmor')
+      expect(property_test).to install_package('default :create apparmor')
         .with(package_name: 'apparmor', version: nil)
     end
 
     it 'creates directory[default :create /etc/apparmor.d/local/mysql]' do
-      expect(ubuntu_1004_service_51_single).to create_directory('default :create /etc/apparmor.d/local/mysql')
+      expect(property_test).to create_directory('default :create /etc/apparmor.d/local/mysql')
         .with(
           path: '/etc/apparmor.d/local/mysql',
           owner: 'root',
@@ -51,7 +79,7 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'creates template[default :create /etc/apparmor.d/local/usr.sbin.mysqld]' do
-      expect(ubuntu_1004_service_51_single).to create_template('default :create /etc/apparmor.d/local/usr.sbin.mysqld')
+      expect(property_test).to create_template('default :create /etc/apparmor.d/local/usr.sbin.mysqld')
         .with(
           path: '/etc/apparmor.d/local/usr.sbin.mysqld',
           cookbook: 'mysql',
@@ -63,7 +91,7 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'creates template[default :create /etc/apparmor.d/usr.sbin.mysqld]' do
-      expect(ubuntu_1004_service_51_single).to create_template('default :create /etc/apparmor.d/usr.sbin.mysqld')
+      expect(property_test).to create_template('default :create /etc/apparmor.d/usr.sbin.mysqld')
         .with(
           path: '/etc/apparmor.d/usr.sbin.mysqld',
           cookbook: 'mysql',
@@ -75,7 +103,7 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'creates template[default :create /etc/apparmor.d/local/mysql/default]' do
-      expect(ubuntu_1004_service_51_single).to create_template('default :create /etc/apparmor.d/local/mysql/default')
+      expect(property_test).to create_template('default :create /etc/apparmor.d/local/mysql/default')
         .with(
           path: '/etc/apparmor.d/local/mysql/default',
           cookbook: 'mysql',
@@ -87,33 +115,33 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'creates service[default :create apparmor]' do
-      expect(ubuntu_1004_service_51_single).to_not start_service('default :create apparmor').with(
+      expect(property_test).to_not start_service('default :create apparmor').with(
         service_name: 'apparmor'
       )
     end
 
     it 'creates group[default :create mysql]' do
-      expect(ubuntu_1004_service_51_single).to create_group('default :create mysql')
+      expect(property_test).to create_group('default :create mysql')
         .with(group_name: 'mysql')
     end
 
     it 'creates user[default :create mysql]' do
-      expect(ubuntu_1004_service_51_single).to create_user('default :create mysql')
+      expect(property_test).to create_user('default :create mysql')
         .with(username: 'mysql')
     end
 
     it 'deletes file[default :create /etc/mysql/my.cnf]' do
-      expect(ubuntu_1004_service_51_single).to delete_file('default :create /etc/mysql/my.cnf')
+      expect(property_test).to delete_file('default :create /etc/mysql/my.cnf')
         .with(path: '/etc/mysql/my.cnf')
     end
 
     it 'deletes file[default :create /etc/my.cnf]' do
-      expect(ubuntu_1004_service_51_single).to delete_file('default :create /etc/my.cnf')
+      expect(property_test).to delete_file('default :create /etc/my.cnf')
         .with(path: '/etc/my.cnf')
     end
 
     it 'creates link[default :create /usr/share/my-default.cnf]' do
-      expect(ubuntu_1004_service_51_single).to create_link('default :create /usr/share/my-default.cnf')
+      expect(property_test).to create_link('default :create /usr/share/my-default.cnf')
         .with(
           target_file: '/usr/share/my-default.cnf',
           to: '/etc/mysql-default/my.cnf'
@@ -121,7 +149,7 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'creates directory[default :create /etc/mysql-default]' do
-      expect(ubuntu_1004_service_51_single).to create_directory('default :create /etc/mysql-default')
+      expect(property_test).to create_directory('default :create /etc/mysql-default')
         .with(
           path: '/etc/mysql-default',
           owner: 'mysql',
@@ -132,7 +160,7 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'creates directory[default :create /etc/mysql-default/conf.d]' do
-      expect(ubuntu_1004_service_51_single).to create_directory('default :create /etc/mysql-default/conf.d')
+      expect(property_test).to create_directory('default :create /etc/mysql-default/conf.d')
         .with(
           path: '/etc/mysql-default/conf.d',
           owner: 'mysql',
@@ -143,7 +171,7 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'creates directory[default :create /run/mysql-default]' do
-      expect(ubuntu_1004_service_51_single).to create_directory('default :create /run/mysql-default')
+      expect(property_test).to create_directory('default :create /run/mysql-default')
         .with(
           path: '/run/mysql-default',
           owner: 'mysql',
@@ -154,7 +182,7 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'creates directory[default :create /var/log/mysql-default]' do
-      expect(ubuntu_1004_service_51_single).to create_directory('default :create /var/log/mysql-default')
+      expect(property_test).to create_directory('default :create /var/log/mysql-default')
         .with(
           path: '/var/log/mysql-default',
           owner: 'mysql',
@@ -165,7 +193,7 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'creates directory[default :create /var/lib/mysql-default]' do
-      expect(ubuntu_1004_service_51_single).to create_directory('default :create /var/lib/mysql-default')
+      expect(property_test).to create_directory('default :create /var/lib/mysql-default')
         .with(
           path: '/var/lib/mysql-default',
           owner: 'mysql',
@@ -176,7 +204,7 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'creates template[default :create /etc/mysql-default/my.cnf]' do
-      expect(ubuntu_1004_service_51_single).to create_template('default :create /etc/mysql-default/my.cnf')
+      expect(property_test).to create_template('default :create /etc/mysql-default/my.cnf')
         .with(
           path: '/etc/mysql-default/my.cnf',
           owner: 'mysql',
@@ -185,19 +213,24 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
         )
     end
 
+    it 'renders file[default :create /etc/mysql-default/my.cnf]' do
+      expect(property_test).to render_file('default :create /etc/mysql-default/my.cnf')
+        .with_content(my_cnf_content)
+    end
+
     it 'runs bash[default :create initialize mysql database]' do
-      expect(ubuntu_1004_service_51_single).to_not run_bash('default :create initialize mysql database')
+      expect(property_test).to_not run_bash('default :create initialize mysql database')
         .with(
           cwd: '/var/lib/mysql-default'
         )
     end
 
     it 'runs bash[default :create initial records]' do
-      expect(ubuntu_1004_service_51_single).to_not run_bash('default :create initial records')
+      expect(property_test).to_not run_bash('default :create initial records')
     end
 
     it 'creates template[default :create /usr/sbin/mysql-default-wait-ready]' do
-      expect(ubuntu_1004_service_51_single).to create_template('default :start /usr/sbin/mysql-default-wait-ready')
+      expect(property_test).to create_template('default :start /usr/sbin/mysql-default-wait-ready')
         .with(
           path: '/usr/sbin/mysql-default-wait-ready',
           source: 'upstart/mysqld-wait-ready.erb',
@@ -209,7 +242,7 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'creates template[default :create /etc/init/mysql-default.conf]' do
-      expect(ubuntu_1004_service_51_single).to create_template('default :start /etc/init/mysql-default.conf')
+      expect(property_test).to create_template('default :start /etc/init/mysql-default.conf')
         .with(
           path: '/etc/init/mysql-default.conf',
           source: 'upstart/mysqld.erb',
@@ -221,7 +254,7 @@ describe 'mysql_service_test::single on ubuntu-10.04' do
     end
 
     it 'starts service[default :start mysql-default]' do
-      expect(ubuntu_1004_service_51_single).to start_service('default :start mysql-default')
+      expect(property_test).to start_service('default :start mysql-default')
         .with(
           service_name: 'mysql-default',
           provider: Chef::Provider::Service::Upstart
